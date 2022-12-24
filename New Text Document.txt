@@ -1,0 +1,43 @@
+##################################################################################
+knn = KNeighborsClassifier()
+knn.fit(X_train, y_train)
+knn_predict=knn.predict(x_pred)
+##################################################################################
+lda = LinearDiscriminantAnalysis()
+lda.fit(X_train, y_train)
+ld_predict = lda.predict(x_pred)
+##################################################################################
+gnb = GaussianNB()
+gnb.fit(X_train, y_train)
+gnb_predict = gnb.predict(x_pred)
+#######################################################################
+rf = RandomForestClassifier(max_features=10, n_estimators=20)
+rf.fit(X_train, y_train)
+rf_predict = rf.predict(x_pred)
+print('Accuracy of GNB classifier on training set: {:.2f}'
+     .format(rf.score(X_train, y_train)))
+print('Accuracy of GNB classifier on test set: {:.2f}'
+     .format(rf.score(X_test, y_test)))
+#########################################################
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
+# max_samples: maximum size 0.5=50% of each sample taken from the full dataset
+# max_features: maximum of features 1=100% taken here all 10K
+# n_estimators: number of decision trees
+bg=BaggingClassifier(DecisionTreeClassifier(),max_samples=0.5,max_features=1.0,n_estimators=10)
+bg.fit(X_train, y_train)
+print("score on test: " + str(bg.score(X_test, y_test)))
+print("score on train: "+ str(bg.score(X_train, y_train)))
+bg_predict = bg.predict(x_pred)
+###################################################
+from sklearn.ensemble import VotingClassifier
+# 1) naive bias = mnb
+# 2) logistic regression =lr
+# 3) random forest =rf
+# 4) support vector machine = svm
+evc=VotingClassifier(estimators=[('mnb',bg),('lr',logreg),('rf',rf),('svm',gnb)],voting='hard')
+evc.fit(X_train, y_train)
+print("score on test: " + str(evc.score(X_test, y_test)))
+print("score on train: "+ str(evc.score(X_train, y_train)))
+evc_predict = evc.predict(x_pred)
+####################################################
